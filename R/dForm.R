@@ -1,24 +1,44 @@
 dForm <- R6::R6Class('dForm',
                      public = list(
+                       #' @description Download and read Form D data for chosen years and quarters.
+                       #' @param years The separator to use for value concatenation
+                       #' @return self for method chaining
+                       #' @export
+                       #'
                        load_data = function(years, quarter = c(1:4), remove_duplicates = TRUE, use_cache = TRUE){
+                         
                          stopifnot(is.numeric(years))
                          stopifnot(is.numeric(quarter))
+                         
                          private$download(years, quarter, usecache = use_cache)
                          private$load(remove_duplicates)
+                         
                          return(invisible(self))
                        },
-                       aggregate_issuers = function(sep = ", "){
-                         cat("Aggregating issuers by accessionnumber\n")
-                         self$issuers <- self$issuers[, lapply(.SD, paste0, collapse = ", "), accessionnumber]
-                         cat(crayon::green(cli::symbol$tick), " Issuers data set aggregated\n")
+                       #' @description Aggregate all Form D data sets that are not unique on acessionnumber.
+                       #' @param sep The separator to use for value concatenation
+                       #' @return self for method chaining
+                       #' @export
+                       #'
+                       aggregate_data = function(sep = ", "){
+                         # cat("Aggregating issuers by accessionnumber\n")
+                         # self$issuers <- self$issuers[, lapply(.SD, paste0, collapse = ", "), accessionnumber]
+                         # cat(crayon::green(cli::symbol$tick), " Issuers data set aggregated\n")
                          return(invisible(self))
                        },
+                       #' @field submissions Combined submission data for selected years and quarters
                        submissions = NULL,
+                       #' @field issuers Combined issuers data for selected years and quarters
                        issuers = NULL,
+                       #' @field offerings Combined offerings data for selected years and quarters
                        offerings = NULL, 
+                       #' @field recipients Combined recipients data for selected years and quarters
                        recipients = NULL,
+                       #' @field related_persons Combined related persons data for selected years and quarters
                        related_persons = NULL,
+                       #' @field signatures Combined signatures data for selected years and quarters
                        signatures = NULL,
+                       #' @field previous_accessions Combined previous accessions data for selected years and quarters
                        previous_accessions = NULL
                      ),
                      private = list(
@@ -117,9 +137,16 @@ dForm <- R6::R6Class('dForm',
                            dta <- dta[!de_dupe_against]
                          }
                          
-                         cat(crayon::green(cli::symbol$tick), fl, " loaded\n", sep = ' ')
+                         cat(crayon::green(cli::symbol$tick), fl, "loaded\n", sep = ' ')
                          
                          return(dta)
+                       },
+                       aggregate = function(dta, separator){
+                         
+                         cat("Aggregating ", dta, " by accessionnumber\n", sep = '')
+                         self[[dta]] <- self[[dta]][, lapply(.SD, paste0, collapse = separator), accessionnumber]
+                         cat(crayon::green(cli::symbol$tick), dta, "data set aggregated\n", sep = ' ')
+                         
                        }
                        
                      )

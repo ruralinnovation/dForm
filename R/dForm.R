@@ -44,6 +44,24 @@ dForm <- R6::R6Class('dForm',
                          private$aggregate('signatures', separator = sep)
                          return(invisible(self))
                        },
+                       #' @description Return a data frame codebook for one data set
+                       #' @param data_set_name The name of the data set to return a codebook for, one of 'submissions', 'issuers', 
+                       #' 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'
+                       #' @return A data frame
+                       #' @export
+                       #'
+                       get_codebook = function(data_set_name){
+                         if (!is.character(data_set_name)){
+                           stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'", call. = FALSE)
+                         }
+                         
+                         if (!data_set_name %in% c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes')){
+                           stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'", call. = FALSE)
+                         }
+                         
+                         self$codebook[[data_set_name]]
+                         
+                       },
                        #' @field codebook Form D data codebook
                        codebook = NULL,
                        #' @field submissions Combined submission data for selected years and quarters

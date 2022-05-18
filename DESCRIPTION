@@ -20,4 +20,5 @@ Imports:
   rappdirs,
   purrr,
   crayon,
-  cli
+  cli,
+  htmltab

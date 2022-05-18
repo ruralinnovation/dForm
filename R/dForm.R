@@ -27,6 +27,7 @@ dForm <- R6::R6Class('dForm',
                          
                          private$download(years, quarter, usecache = use_cache)
                          private$load(remove_duplicates)
+                         private$make_codebook()
                          
                          return(invisible(self))
                        },
@@ -43,6 +44,8 @@ dForm <- R6::R6Class('dForm',
                          private$aggregate('signatures', separator = sep)
                          return(invisible(self))
                        },
+                       #' @field codebook Form D data codebook
+                       codebook = NULL,
                        #' @field submissions Combined submission data for selected years and quarters
                        submissions = NULL,
                        #' @field issuers Combined issuers data for selected years and quarters
@@ -138,6 +141,22 @@ dForm <- R6::R6Class('dForm',
                          self$signatures      <- private$process_files(file.path(dirs_to_load, "SIGNATURES.tsv"), dedupe, self$previous_accessions)
                          
                        },
+                       make_codebook = function(){
+                         dirs <- list.dirs(path.expand(rappdirs::user_cache_dir(appname = 'dForm')))
+                         dir_to_load <- dirs[grepl("\\d{4}Q\\d_d", dirs)][[1]]
+                         
+                         cb_path <- path.expand(file.path(dir_to_load, "FormD_readme.html"))
+                         
+                         self$codebook <- lapply(1:7, function(tblnum){
+                           dta <- htmltab(r"(C:\Users\mattr\AppData\Local\dForm\dForm\Cache\2019Q1_d\FormD_readme.html)", tblnum, rm_nodata_cols = FALSE)
+                           names(dta) <- gsub("\\W+", "_", tolower(names(dta)))
+                           
+                           return(dta)
+                         })
+                         
+                         names(self$codebook) <- c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes')
+                         
+                       }
                        process_files = function(dirlist, de_dupe, de_dupe_against = NULL){
                          fl <- gsub("\\.tsv$", "",basename(dirlist[[1]]))
                          cat("Loading ", fl, " from cache for selected years\n", sep  = '')

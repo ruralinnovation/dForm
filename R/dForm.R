@@ -52,11 +52,11 @@ dForm <- R6::R6Class('dForm',
                        #'
                        get_codebook = function(data_set_name){
                          if (!is.character(data_set_name)){
-                           stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'", call. = FALSE)
+                           stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures'", call. = FALSE)
                          }
                          
-                         if (!data_set_name %in% c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes')){
-                           stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'", call. = FALSE)
+                         if (!data_set_name %in% c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures')){
+                           stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures'", call. = FALSE)
                          }
                          
                          self$codebook[[data_set_name]]
@@ -165,16 +165,16 @@ dForm <- R6::R6Class('dForm',
                          
                          cb_path <- path.expand(file.path(dir_to_load, "FormD_readme.html"))
                          
-                         self$codebook <- lapply(1:7, function(tblnum){
-                           dta <- htmltab(r"(C:\Users\mattr\AppData\Local\dForm\dForm\Cache\2019Q1_d\FormD_readme.html)", tblnum, rm_nodata_cols = FALSE)
+                         self$codebook <- lapply(1:6, function(tblnum){
+                           dta <- htmltab::htmltab(r"(C:\Users\mattr\AppData\Local\dForm\dForm\Cache\2019Q1_d\FormD_readme.html)", tblnum, rm_nodata_cols = FALSE)
                            names(dta) <- gsub("\\W+", "_", tolower(names(dta)))
                            
                            return(dta)
                          })
                          
-                         names(self$codebook) <- c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes')
+                         names(self$codebook) <- c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures')
                          
-                       }
+                       },
                        process_files = function(dirlist, de_dupe, de_dupe_against = NULL){
                          fl <- gsub("\\.tsv$", "",basename(dirlist[[1]]))
                          cat("Loading ", fl, " from cache for selected years\n", sep  = '')

@@ -13,6 +13,8 @@ using previous accessions.
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{codebook}}{Form D data codebook}
+
 \item{\code{submissions}}{Combined submission data for selected years and quarters}
 
 \item{\code{issuers}}{Combined issuers data for selected years and quarters}
@@ -34,6 +36,7 @@ using previous accessions.
 \itemize{
 \item \href{#method-load_data}{\code{dForm$load_data()}}
 \item \href{#method-aggregate_data}{\code{dForm$aggregate_data()}}
+\item \href{#method-get_codebook}{\code{dForm$get_codebook()}}
 \item \href{#method-clone}{\code{dForm$clone()}}
 }
 }
@@ -86,6 +89,27 @@ Aggregate all Form D data sets that are not unique on acessionnumber.
 }
 \subsection{Returns}{
 self for method chaining
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_codebook"></a>}}
+\if{latex}{\out{\hypertarget{method-get_codebook}{}}}
+\subsection{Method \code{get_codebook()}}{
+Return a data frame codebook for one data set
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dForm$get_codebook(data_set_name)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{data_set_name}}{The name of the data set to return a codebook for, one of 'submissions', 'issuers',
+'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A data frame
 }
 }
 \if{html}{\out{<hr>}}

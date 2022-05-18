@@ -1,7 +1,19 @@
+#' R6 Class for downloading, caching, and basic processing of SEC Form D data
+#'
+#' @description
+#' Downloads, caches, combines, and optionally de-duplicates SEC Form D data
+#'
+#' @details
+#' A dForm object can download Form D data, make that data available in your session, and optionally de-duplicate that data 
+#' using previous accessions.
+#' 
 dForm <- R6::R6Class('dForm',
                      public = list(
                        #' @description Download and read Form D data for chosen years and quarters.
                        #' @param years The separator to use for value concatenation
+                       #' @param quarter Quarters to download. Defaults to all quarters (1 to 4).
+                       #' @param remove_duplicates If `TRUE`, the previous accession numbers in the `offerings` data will be used to de-duplicate the data
+                       #' @param use_cache If `TRUE`, read data from cached downloads. Otherwise, download and load the data.
                        #' @return self for method chaining
                        #' @export
                        #'
@@ -9,6 +21,9 @@ dForm <- R6::R6Class('dForm',
                          
                          stopifnot(is.numeric(years))
                          stopifnot(is.numeric(quarter))
+                         if (max(quarter) > 4 | min(quarter) < 1){
+                           stop("Quarter must be a numeric vector or value between 1 and 4", call. = FALSE)
+                         }
                          
                          private$download(years, quarter, usecache = use_cache)
                          private$load(remove_duplicates)
@@ -21,9 +36,7 @@ dForm <- R6::R6Class('dForm',
                        #' @export
                        #'
                        aggregate_data = function(sep = ", "){
-                         # cat("Aggregating issuers by accessionnumber\n")
-                         # self$issuers <- self$issuers[, lapply(.SD, paste0, collapse = ", "), accessionnumber]
-                         # cat(crayon::green(cli::symbol$tick), " Issuers data set aggregated\n")
+                         
                          return(invisible(self))
                        },
                        #' @field submissions Combined submission data for selected years and quarters
@@ -143,8 +156,14 @@ dForm <- R6::R6Class('dForm',
                        },
                        aggregate = function(dta, separator){
                          
+                         if(is.null(self[[dta]])){
+                           stop(paste0(dta, ' has not been loaded'), call. = FALSE)
+                         }
+                         
                          cat("Aggregating ", dta, " by accessionnumber\n", sep = '')
+                         
                          self[[dta]] <- self[[dta]][, lapply(.SD, paste0, collapse = separator), accessionnumber]
+                         
                          cat(crayon::green(cli::symbol$tick), dta, "data set aggregated\n", sep = ' ')
                          
                        }

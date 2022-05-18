@@ -37,6 +37,10 @@ dForm <- R6::R6Class('dForm',
                        #'
                        aggregate_data = function(sep = ", "){
                          
+                         private$aggregate('issuers', separator = sep)
+                         private$aggregate('recipients', separator = sep)
+                         private$aggregate('related_persons', separator = sep)
+                         private$aggregate('signatures', separator = sep)
                          return(invisible(self))
                        },
                        #' @field submissions Combined submission data for selected years and quarters

@@ -135,6 +135,8 @@ dForm <- R6::R6Class('dForm',
                            
                          })
                        },
+                       #' @description Load data
+                       #' @import data.table
                        load = function(dedupe){
                          dirs <- list.dirs(path.expand(rappdirs::user_cache_dir(appname = 'dForm')))
                          dirs_to_load <- dirs[grepl("\\d{4}Q\\d_d", dirs)]
@@ -144,7 +146,7 @@ dForm <- R6::R6Class('dForm',
                          self$offerings       <- private$process_files(file.path(dirs_to_load, "OFFERING.tsv"), dedupe)
                          
                          # get previous accession numbers for de-duplication
-                         self$previous_accessions <- self$offerings[!is.na(previousaccessionnumber) & previousaccessionnumber != '', .(accessionnumber = previousaccessionnumber)]
+                         self$previous_accessions <- self$offerings[!is.na(previousaccessionnumber) & previousaccessionnumber != '', list(accessionnumber = previousaccessionnumber)]
                          
                          data.table::setkey(self$previous_accessions, 'accessionnumber')
                          
@@ -166,7 +168,7 @@ dForm <- R6::R6Class('dForm',
                          cb_path <- path.expand(file.path(dir_to_load, "FormD_readme.html"))
                          
                          self$codebook <- lapply(1:6, function(tblnum){
-                           dta <- htmltab::htmltab(r"(C:\Users\mattr\AppData\Local\dForm\dForm\Cache\2019Q1_d\FormD_readme.html)", tblnum, rm_nodata_cols = FALSE)
+                           dta <- htmltab::htmltab(cb_path, tblnum, rm_nodata_cols = FALSE)
                            names(dta) <- gsub("\\W+", "_", tolower(names(dta)))
                            
                            return(dta)

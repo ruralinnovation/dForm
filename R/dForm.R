@@ -135,8 +135,6 @@ dForm <- R6::R6Class('dForm',
                            
                          })
                        },
-                       #' @description Load data
-                       #' @import data.table
                        load = function(dedupe){
                          dirs <- list.dirs(path.expand(rappdirs::user_cache_dir(appname = 'dForm')))
                          dirs_to_load <- dirs[grepl("\\d{4}Q\\d_d", dirs)]
@@ -144,7 +142,7 @@ dForm <- R6::R6Class('dForm',
                          
                          # read offerings first because this tracks previous accession numbers needed for rough deduplication
                          self$offerings       <- private$process_files(file.path(dirs_to_load, "OFFERING.tsv"), dedupe)
-                         
+                         # browser()
                          # get previous accession numbers for de-duplication
                          self$previous_accessions <- self$offerings[!is.na(previousaccessionnumber) & previousaccessionnumber != '', list(accessionnumber = previousaccessionnumber)]
                          

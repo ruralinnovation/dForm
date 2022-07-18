@@ -95,7 +95,7 @@ dForm <- R6::R6Class('dForm',
                            # check for cached version of file
                            if (dir.exists(file.path(rappdirs::user_cache_dir(appname = 'dForm'), dir)) & usecache){
                              
-                             cat(crayon::yellow(cli::symbol$warning), " A cached version of ", dir, " was found. Skipping download. To override this behavior, set `use_cache` = FALSE\n", sep = "")
+                             message(crayon::yellow(cli::symbol$warning), " A cached version of ", dir, " was found. Skipping download. To override this behavior, set `use_cache` = FALSE\n", sep = "")
                              
                            } else {
                              
@@ -114,7 +114,7 @@ dForm <- R6::R6Class('dForm',
                              },
                              error = function(cond){
                                
-                               cat(crayon::red(cli::symbol$cross), " Form D data is unavailable for ", substring(basename(link), 1, 6), ". Skipping download.\n", sep = "")
+                               message(crayon::red(cli::symbol$cross), " Form D data is unavailable for ", substring(basename(link), 1, 6), ". Skipping download.\n", sep = "")
                                
                              })
                              
@@ -129,7 +129,7 @@ dForm <- R6::R6Class('dForm',
                                  
                                }, error = function(cond){
                                  
-                                 cat(crayon::red(cli::symbol$cross), " Error extracting data for ", substring(basename(link), 1, 6), ".\n", sep = "")
+                                 message(crayon::red(cli::symbol$cross), " Error extracting data for ", substring(basename(link), 1, 6), ".\n", sep = "")
                                  
                                })
                                
@@ -180,7 +180,7 @@ dForm <- R6::R6Class('dForm',
                        },
                        process_files = function(dirlist, de_dupe, de_dupe_against = NULL){
                          fl <- gsub("\\.tsv$", "",basename(dirlist[[1]]))
-                         cat("Loading ", fl, " from cache for selected years\n", sep  = '')
+                         message("Loading ", fl, " from cache for selected years\n", sep  = '')
                          
                          dta <- suppressWarnings(data.table::rbindlist(lapply(dirlist, function(fp){
                            d <- data.table::fread(fp, sep = '\t', colClasses = list(character = 'FILING_DATE'))
@@ -202,7 +202,7 @@ dForm <- R6::R6Class('dForm',
                            dta <- dta[!de_dupe_against]
                          }
                          
-                         cat(crayon::green(cli::symbol$tick), fl, "loaded\n", sep = ' ')
+                         message(crayon::green(cli::symbol$tick), fl, "loaded\n", sep = ' ')
                          
                          return(dta)
                        },
@@ -212,11 +212,11 @@ dForm <- R6::R6Class('dForm',
                            stop(paste0(dta, ' has not been loaded'), call. = FALSE)
                          }
                          
-                         cat("Aggregating ", dta, " by accessionnumber\n", sep = '')
+                         message("Aggregating ", dta, " by accessionnumber\n", sep = '')
                          
                          self[[dta]] <- self[[dta]][, lapply(.SD, paste0, collapse = separator), accessionnumber]
                          
-                         cat(crayon::green(cli::symbol$tick), dta, "data set aggregated\n", sep = ' ')
+                         message(crayon::green(cli::symbol$tick), dta, "data set aggregated\n", sep = ' ')
                          
                        }
                        

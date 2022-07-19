@@ -44,21 +44,24 @@ dForm <- R6::R6Class('dForm',
                          private$aggregate('signatures', separator = sep)
                          return(invisible(self))
                        },
-                       #' @description Return a data frame codebook for one data set
-                       #' @param data_set_name The name of the data set to return a codebook for, one of 'submissions', 'issuers', 
+                       #' @description Combine two or more component data
+                       #' @param tables_to_combine The name of the data set to return a codebook for, one of 'submissions', 'issuers', 
                        #' 'offerings', 'recipients', 'related_persons', 'signatures'
-                       #' @return A data frame
+                       #' @return A data
                        #' @export
-                       #'
+                       #' @importFrom data.table setDT
+                       #' 
                        combine_data = function(tables_to_combine = c('submissions', 'offerings', 'issuers')){
                          if (!all(tables_to_combine %in% private$fields)){
                            stop("`tables_to_combine` must contain only 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures'", call. = FALSE)
                          }
                          
-                         combn <- Reduce(function(x, y) merge(x, y, by = "accessionnumber"), 
+                         combined <- Reduce(function(x, y) merge(x, y, by = "accessionnumber"), 
                                          lapply(unique(tables_to_combine), function(x) get(x, envir = self))
                                          )
-                         return(combn)
+                         data.table::setDT(combined)
+                         
+                         return(combined)
                        },
                        #' @description Return a data frame codebook for one data set
                        #' @param data_set_name The name of the data set to return a codebook for, one of 'submissions', 'issuers', 

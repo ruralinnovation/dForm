@@ -1,3 +1,10 @@
+# The SEC servers are returning an error when we use the default User-Agent for HTTPS requests...
+# Error in download.file("https://www.sec.gov/files/structureddata/data/form-d-data-sets/2020q1_d.zip",  : 
+#  cannot open URL 'https://www.sec.gov/files/structureddata/data/form-d-data-sets/2020q1_d.zip'
+# ... so we are hacking the User-Agent header that is sent with each request;
+# in 2024-06-20
+
+
 #' R6 Class for downloading, caching, and basic processing of SEC Form D data
 #'
 #' @description
@@ -129,7 +136,10 @@ dForm <- R6::R6Class('dForm',
                              # download files
                              tryCatch({
                                
-                               suppressWarnings(download.file(link, file.path(tempdir(), basename(link))))
+                               suppressWarnings(download.file(link,
+                                                              file.path(tempdir(),
+                                                                        basename(link)),
+                                                              headers = c("User-Agent" = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0")))
                                
                              },
                              error = function(cond){

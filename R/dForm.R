@@ -50,9 +50,28 @@ dForm <- R6::R6Class('dForm',
                          private$aggregate('signatures', separator = sep)
                          return(invisible(self))
                        },
+                       #' @description Combine two or more component data
+                       #' @param tables_to_combine The name of the data set to return a codebook for, one of 'submissions', 'issuers', 
+                       #' 'offerings', 'recipients', 'related_persons', 'signatures'
+                       #' @return A data
+                       #' @export
+                       #' @importFrom data.table setDT
+                       #' 
+                       combine_data = function(tables_to_combine = c('submissions', 'offerings', 'issuers')){
+                         if (!all(tables_to_combine %in% private$fields)){
+                           stop("`tables_to_combine` must contain only 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures'", call. = FALSE)
+                         }
+                         
+                         combined <- Reduce(function(x, y) merge(x, y, by = "accessionnumber"), 
+                                         lapply(unique(tables_to_combine), function(x) get(x, envir = self))
+                                         )
+                         data.table::setDT(combined)
+                         
+                         return(combined)
+                       },
                        #' @description Return a data frame codebook for one data set
                        #' @param data_set_name The name of the data set to return a codebook for, one of 'submissions', 'issuers', 
-                       #' 'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'
+                       #' 'offerings', 'recipients', 'related_persons', 'signatures'
                        #' @return A data frame
                        #' @export
                        #'
@@ -61,7 +80,7 @@ dForm <- R6::R6Class('dForm',
                            stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures'", call. = FALSE)
                          }
                          
-                         if (!data_set_name %in% c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures')){
+                         if (!data_set_name %in% private$fields){
                            stop("`data_set_name` must be one of 'submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures'", call. = FALSE)
                          }
                          
@@ -86,6 +105,7 @@ dForm <- R6::R6Class('dForm',
                        previous_accessions = NULL
                      ),
                      private = list(
+                       fields = c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures'),
                        link_ptn = "https://www.sec.gov/files/structureddata/data/form-d-data-sets/{year}q{quarter}_d{suffix}.zip",
                        dir_ptn = "{year}Q{quarter}_d",
                        download = function(years, quarter, usecache){
@@ -101,7 +121,7 @@ dForm <- R6::R6Class('dForm',
                            # check for cached version of file
                            if (dir.exists(file.path(rappdirs::user_cache_dir(appname = 'dForm'), dir)) & usecache){
                              
-                             cat(crayon::yellow(cli::symbol$warning), " A cached version of ", dir, " was found. Skipping download. To override this behavior, set `use_cache` = FALSE\n", sep = "")
+                             message("!! A cached version of ", dir, " was found. Skipping download. To override this behavior, set `use_cache` = FALSE\n", sep = "")
                              
                            } else {
                              
@@ -123,7 +143,7 @@ dForm <- R6::R6Class('dForm',
                              },
                              error = function(cond){
                                
-                               cat(crayon::red(cli::symbol$cross), " Form D data is unavailable for ", substring(basename(link), 1, 6), ". Skipping download.\n", sep = "")
+                               message(crayon::red(cli::symbol$cross), " Form D data is unavailable for ", substring(basename(link), 1, 6), ". Skipping download.\n")
                                
                              })
                              
@@ -138,7 +158,7 @@ dForm <- R6::R6Class('dForm',
                                  
                                }, error = function(cond){
                                  
-                                 cat(crayon::red(cli::symbol$cross), " Error extracting data for ", substring(basename(link), 1, 6), ".\n", sep = "")
+                                 message(crayon::red(cli::symbol$cross), " Error extracting data for ", substring(basename(link), 1, 6), ".\n", sep = "")
                                  
                                })
                                
@@ -189,7 +209,7 @@ dForm <- R6::R6Class('dForm',
                        },
                        process_files = function(dirlist, de_dupe, de_dupe_against = NULL){
                          fl <- gsub("\\.tsv$", "",basename(dirlist[[1]]))
-                         cat("Loading ", fl, " from cache for selected years\n", sep  = '')
+                         message("Loading ", fl, " from cache for selected years\n", sep  = '')
                          
                          dta <- suppressWarnings(data.table::rbindlist(lapply(dirlist, function(fp){
                            d <- data.table::fread(fp, sep = '\t', colClasses = list(character = 'FILING_DATE'))
@@ -211,7 +231,7 @@ dForm <- R6::R6Class('dForm',
                            dta <- dta[!de_dupe_against]
                          }
                          
-                         cat(crayon::green(cli::symbol$tick), fl, "loaded\n", sep = ' ')
+                         message(crayon::green(cli::symbol$tick), " ", fl, " loaded\n")
                          
                          return(dta)
                        },
@@ -221,11 +241,11 @@ dForm <- R6::R6Class('dForm',
                            stop(paste0(dta, ' has not been loaded'), call. = FALSE)
                          }
                          
-                         cat("Aggregating ", dta, " by accessionnumber\n", sep = '')
+                         message("Aggregating ", dta, " by accessionnumber\n", sep = '')
                          
                          self[[dta]] <- self[[dta]][, lapply(.SD, paste0, collapse = separator), accessionnumber]
                          
-                         cat(crayon::green(cli::symbol$tick), dta, "data set aggregated\n", sep = ' ')
+                         message(crayon::green(cli::symbol$tick), " ", dta, "data set aggregated\n")
                          
                        }
                        

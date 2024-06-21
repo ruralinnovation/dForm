@@ -36,6 +36,7 @@ using previous accessions.
 \itemize{
 \item \href{#method-load_data}{\code{dForm$load_data()}}
 \item \href{#method-aggregate_data}{\code{dForm$aggregate_data()}}
+\item \href{#method-combine_data}{\code{dForm$combine_data()}}
 \item \href{#method-get_codebook}{\code{dForm$get_codebook()}}
 \item \href{#method-clone}{\code{dForm$clone()}}
 }
@@ -92,6 +93,29 @@ self for method chaining
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-combine_data"></a>}}
+\if{latex}{\out{\hypertarget{method-combine_data}{}}}
+\subsection{Method \code{combine_data()}}{
+Combine two or more component data
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dForm$combine_data(
+  tables_to_combine = c("submissions", "offerings", "issuers")
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{tables_to_combine}}{The name of the data set to return a codebook for, one of 'submissions', 'issuers',
+'offerings', 'recipients', 'related_persons', 'signatures'}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A data
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_codebook"></a>}}
 \if{latex}{\out{\hypertarget{method-get_codebook}{}}}
 \subsection{Method \code{get_codebook()}}{
@@ -104,7 +128,7 @@ Return a data frame codebook for one data set
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{data_set_name}}{The name of the data set to return a codebook for, one of 'submissions', 'issuers',
-'offerings', 'recipients', 'related_persons', 'signatures', 'state_country_codes'}
+'offerings', 'recipients', 'related_persons', 'signatures'}
 }
 \if{html}{\out{</div>}}
 }

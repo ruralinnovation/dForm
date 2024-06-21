@@ -211,7 +211,15 @@ dForm <- R6::R6Class('dForm',
                          fl <- gsub("\\.tsv$", "",basename(dirlist[[1]]))
                          message("Loading ", fl, " from cache for selected years\n", sep  = '')
                          
-                         dta <- suppressWarnings(data.table::rbindlist(lapply(dirlist, data.table::fread, sep = '\t', colClasses = list(character = 'FILING_DATE'))))
+                         dta <- suppressWarnings(data.table::rbindlist(lapply(dirlist, function(fp){
+                           d <- data.table::fread(fp, sep = '\t', colClasses = list(character = 'FILING_DATE'))
+                           fl <- unlist(strsplit(fp, "\\\\|/"))[[length(unlist(strsplit(fp, "\\\\|/"))) - 1]]
+                           
+                           d[, year := as.numeric(substring(fl, 1, 4))]
+                           d[, quarter := as.numeric(substring(fl, 6, 6))]
+                           
+                           d
+                         } )))
                          
                          data.table::setnames(dta, names(dta), tolower(names(dta)))
                          

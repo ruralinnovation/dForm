@@ -4,7 +4,6 @@
 # ... so we are hacking the User-Agent header that is sent with each request;
 # in 2024-06-20
 
-
 #' R6 Class for downloading, caching, and basic processing of SEC Form D data
 #'
 #' @description
@@ -132,7 +131,7 @@ dForm <- R6::R6Class('dForm',
                                unlink(file.path(rappdirs::user_cache_dir(appname = 'dForm'), dir), recursive = TRUE)
                                
                              } 
-                             
+
                              # download files
                              tryCatch({
                                

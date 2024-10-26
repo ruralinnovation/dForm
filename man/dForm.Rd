@@ -34,16 +34,16 @@ using previous accessions.
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-load_data}{\code{dForm$load_data()}}
-\item \href{#method-aggregate_data}{\code{dForm$aggregate_data()}}
-\item \href{#method-combine_data}{\code{dForm$combine_data()}}
-\item \href{#method-get_codebook}{\code{dForm$get_codebook()}}
-\item \href{#method-clone}{\code{dForm$clone()}}
+\item \href{#method-dForm-load_data}{\code{dForm$load_data()}}
+\item \href{#method-dForm-aggregate_data}{\code{dForm$aggregate_data()}}
+\item \href{#method-dForm-combine_data}{\code{dForm$combine_data()}}
+\item \href{#method-dForm-get_codebook}{\code{dForm$get_codebook()}}
+\item \href{#method-dForm-clone}{\code{dForm$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-load_data"></a>}}
-\if{latex}{\out{\hypertarget{method-load_data}{}}}
+\if{html}{\out{<a id="method-dForm-load_data"></a>}}
+\if{latex}{\out{\hypertarget{method-dForm-load_data}{}}}
 \subsection{Method \code{load_data()}}{
 Download and read Form D data for chosen years and quarters.
 \subsection{Usage}{
@@ -73,8 +73,8 @@ self for method chaining
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-aggregate_data"></a>}}
-\if{latex}{\out{\hypertarget{method-aggregate_data}{}}}
+\if{html}{\out{<a id="method-dForm-aggregate_data"></a>}}
+\if{latex}{\out{\hypertarget{method-dForm-aggregate_data}{}}}
 \subsection{Method \code{aggregate_data()}}{
 Aggregate all Form D data sets that are not unique on acessionnumber.
 \subsection{Usage}{
@@ -93,8 +93,8 @@ self for method chaining
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-combine_data"></a>}}
-\if{latex}{\out{\hypertarget{method-combine_data}{}}}
+\if{html}{\out{<a id="method-dForm-combine_data"></a>}}
+\if{latex}{\out{\hypertarget{method-dForm-combine_data}{}}}
 \subsection{Method \code{combine_data()}}{
 Combine two or more component data
 \subsection{Usage}{
@@ -116,8 +116,8 @@ A data
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_codebook"></a>}}
-\if{latex}{\out{\hypertarget{method-get_codebook}{}}}
+\if{html}{\out{<a id="method-dForm-get_codebook"></a>}}
+\if{latex}{\out{\hypertarget{method-dForm-get_codebook}{}}}
 \subsection{Method \code{get_codebook()}}{
 Return a data frame codebook for one data set
 \subsection{Usage}{
@@ -137,8 +137,8 @@ A data frame
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-dForm-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-dForm-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -33,7 +33,7 @@ dForm <- R6::R6Class('dForm',
                          
                          private$download(years, quarter, usecache = use_cache)
                          private$load(remove_duplicates)
-                         private$make_codebook()
+                         # private$make_codebook()
                          
                          return(invisible(self))
                        },
@@ -117,6 +117,8 @@ dForm <- R6::R6Class('dForm',
                          dirs           <- glue::glue_data(expand.grid(year = years, quarter = quarter), private$dir_ptn)
                          
                          purrr::walk2(download_links, dirs, function(link, dir){
+
+                           download_path  <- file.path(tempdir(), basename(link))
                            
                            # check for cached version of file
                            if (dir.exists(file.path(rappdirs::user_cache_dir(appname = 'dForm'), dir)) & usecache){
@@ -135,10 +137,18 @@ dForm <- R6::R6Class('dForm',
                              # download files
                              tryCatch({
                                
-                               suppressWarnings(download.file(link,
-                                                              file.path(tempdir(),
-                                                                        basename(link)),
-                                                              headers = c("User-Agent" = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0")))
+                               # suppressWarnings(download.file(link,
+                               #                                file.path(tempdir(),
+                               #                                          basename(link)),
+                               #                                headers = c("User-Agent" = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
+
+                               curl_command <- paste0(
+                                 "curl '", link, "' --output ", download_path, " -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' -H 'Sec-Fetch-Dest: document' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Site: none' -H 'Sec-Fetch-User: ?1' -H 'Sec-GPC: 1' -H 'Priority: u=0, i'"
+                               )
+
+                               message(paste0("Requesting download:\n", curl_command))
+
+                               suppressWarnings(system(curl_command))
                                
                              },
                              error = function(cond){
@@ -148,13 +158,11 @@ dForm <- R6::R6Class('dForm',
                              })
                              
                              # unzip files
-                             if (file.exists(file.path(tempdir(), basename(link))
-                             )
-                             ){
+                             if (file.exists(download_path)){
                                
                                tryCatch({
                                  
-                                 zip::unzip(file.path(tempdir(), basename(link)), exdir = path.expand(rappdirs::user_cache_dir(appname = 'dForm')))
+                                 zip::unzip(download_path, exdir = path.expand(rappdirs::user_cache_dir(appname = 'dForm')))
                                  
                                }, error = function(cond){
                                  
@@ -191,47 +199,54 @@ dForm <- R6::R6Class('dForm',
                          self$signatures      <- private$process_files(file.path(dirs_to_load, "SIGNATURES.tsv"), dedupe, self$previous_accessions)
                          
                        },
-                       make_codebook = function(){
-                         dirs <- list.dirs(path.expand(rappdirs::user_cache_dir(appname = 'dForm')))
-                         dir_to_load <- dirs[grepl("\\d{4}Q\\d_d", dirs)][[1]]
-                         
-                         cb_path <- path.expand(file.path(dir_to_load, "FormD_readme.html"))
-                         
-                         self$codebook <- lapply(1:6, function(tblnum){
-                           dta <- htmltab::htmltab(cb_path, tblnum, rm_nodata_cols = FALSE)
-                           names(dta) <- gsub("\\W+", "_", tolower(names(dta)))
-                           
-                           return(dta)
-                         })
-                         
-                         names(self$codebook) <- c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures')
-                         
-                       },
+                       # make_codebook = function(){
+                       #   dirs <- list.dirs(path.expand(rappdirs::user_cache_dir(appname = 'dForm')))
+                       #   dir_to_load <- dirs[grepl("\\d{4}Q\\d_d", dirs)][[1]]
+                       #
+                       #   cb_path <- path.expand(file.path(dir_to_load, "FormD_readme.html"))
+                       #
+                       #   self$codebook <- lapply(1:6, function(tblnum){
+                       #     dta <- htmltab::htmltab(cb_path, tblnum, rm_nodata_cols = FALSE)
+                       #     names(dta) <- gsub("\\W+", "_", tolower(names(dta)))
+                       #
+                       #     return(dta)
+                       #   })
+                       #
+                       #   names(self$codebook) <- c('submissions', 'issuers', 'offerings', 'recipients', 'related_persons', 'signatures')
+                       #
+                       # },
                        process_files = function(dirlist, de_dupe, de_dupe_against = NULL){
-                         fl <- gsub("\\.tsv$", "",basename(dirlist[[1]]))
-                         message("Loading ", fl, " from cache for selected years\n", sep  = '')
-                         
-                         dta <- suppressWarnings(data.table::rbindlist(lapply(dirlist, function(fp){
-                           d <- data.table::fread(fp, sep = '\t', colClasses = list(character = 'FILING_DATE'))
-                           fl <- unlist(strsplit(fp, "\\\\|/"))[[length(unlist(strsplit(fp, "\\\\|/"))) - 1]]
-                           
-                           d[, year := as.numeric(substring(fl, 1, 4))]
-                           d[, quarter := as.numeric(substring(fl, 6, 6))]
-                           
-                           d
-                         } )))
-                         
-                         data.table::setnames(dta, names(dta), tolower(names(dta)))
-                         
-                         if ('accessionnumber' %in% names(dta)){
-                           data.table::setkey(dta, 'accessionnumber')
+                         message(paste0("typeof dirlist: ", typeof(dirlist)))
+                         basename(dirlist[1])
+
+                         if (!is.null(dirlist) && !is.null(dirlist) && length(dirlist) > 0) {
+                           fl <- gsub("\\.tsv$", "", basename(dirlist[1]))
+                           message("Loading ", fl, " from cache for selected years\n", sep  = '')
+
+                           dta <- suppressWarnings(data.table::rbindlist(lapply(dirlist, function(fp){
+                             d <- data.table::fread(fp, sep = '\t', colClasses = list(character = 'FILING_DATE'))
+                             fl <- unlist(strsplit(fp, "\\\\|/"))[[length(unlist(strsplit(fp, "\\\\|/"))) - 1]]
+
+                             d[, year := as.numeric(substring(fl, 1, 4))]
+                             d[, quarter := as.numeric(substring(fl, 6, 6))]
+
+                             d
+                           } )))
+
+                           data.table::setnames(dta, names(dta), tolower(names(dta)))
+
+                           if ('accessionnumber' %in% names(dta)){
+                             data.table::setkey(dta, 'accessionnumber')
+                           }
+
+                           if (de_dupe & !is.null(de_dupe_against) & 'accessionnumber' %in% names(dta)){
+                             dta <- dta[!de_dupe_against]
+                           }
+
+                           message(crayon::green(cli::symbol$tick), " ", fl, " loaded\n")
+                         } else {
+                           stop(crayon::red(cli::symbol$cross), " Error in directory argument for extract: ", dirlist, ".\n", sep = "")
                          }
-                         
-                         if (de_dupe & !is.null(de_dupe_against) & 'accessionnumber' %in% names(dta)){
-                           dta <- dta[!de_dupe_against]
-                         }
-                         
-                         message(crayon::green(cli::symbol$tick), " ", fl, " loaded\n")
                          
                          return(dta)
                        },

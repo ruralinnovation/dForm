@@ -107,7 +107,7 @@ dForm <- R6::R6Class('dForm',
                        download = function(years, quarter, usecache){
                          
                          link_dta <- data.table::as.data.table(expand.grid(year = years, quarter = quarter))
-                         link_dta[, suffix := ifelse(year < 2014, "_0", "")]
+                         link_dta[, suffix := ifelse((year < 2014) & !(year == 2012 & quarter == 1), "_0", "")]
                          
                          download_links <- glue::glue_data(link_dta, private$link_ptn)
                          dirs           <- glue::glue_data(expand.grid(year = years, quarter = quarter), private$dir_ptn)

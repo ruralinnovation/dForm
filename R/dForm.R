@@ -1,8 +1,4 @@
-# The SEC servers are returning an error when we use the default User-Agent for HTTPS requests...
-# Error in download.file("https://www.sec.gov/files/structureddata/data/form-d-data-sets/2020q1_d.zip",  : 
-#  cannot open URL 'https://www.sec.gov/files/structureddata/data/form-d-data-sets/2020q1_d.zip'
-# ... so we are hacking the User-Agent header that is sent with each request;
-# in 2024-06-20
+# UPDATE: User-Agent header hack is not working. Replacing download.file with CORI-brewed download_file
 
 #' R6 Class for downloading, caching, and basic processing of SEC Form D data
 #'
@@ -136,20 +132,17 @@ dForm <- R6::R6Class('dForm',
 
                              # download files
                              tryCatch({
-                               
-                               # suppressWarnings(download.file(link,
-                               #                                file.path(tempdir(),
-                               #                                          basename(link)),
-                               #                                headers = c("User-Agent" = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")))
 
-                               curl_command <- paste0(
-                                 "curl '", link, "' --output ", download_path, " -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' -H 'Sec-Fetch-Dest: document' -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Site: none' -H 'Sec-Fetch-User: ?1' -H 'Sec-GPC: 1' -H 'Priority: u=0, i'"
-                               )
+                               message(paste0("Retrieving data from: ", link))
 
-                               message(paste0("Requesting download:\n", curl_command))
+                               res <- download_file(link, download_path)
 
-                               suppressWarnings(system(curl_command))
-                               
+                               # Check res
+                               if (!(download_path %in% res)) {
+                                 message(paste0("Error in download result: ", res))
+                               }
+
+
                              },
                              error = function(cond){
                                
